@@ -1,0 +1,194 @@
+definitions:
+  internal_app_api.Auth:
+    properties:
+      email:
+        type: string
+      pwd_hash:
+        type: string
+    type: object
+  internal_app_api.ChangePassword:
+    properties:
+      new_password:
+        type: string
+      restore_uid:
+        type: string
+    type: object
+  internal_app_api.Refresh:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  internal_app_api.RestorePasswordEmail:
+    properties:
+      email:
+        type: string
+    type: object
+  internal_app_api.Tokens:
+    properties:
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+      token:
+        type: string
+    type: object
+  task-manager-backend_internal_app_api.Auth:
+    properties:
+      email:
+        type: string
+      pwd_hash:
+        type: string
+    type: object
+  task-manager-backend_internal_app_api.ChangePassword:
+    properties:
+      new_password:
+        type: string
+      restore_uid:
+        type: string
+    type: object
+  task-manager-backend_internal_app_api.Refresh:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  task-manager-backend_internal_app_api.RestorePasswordEmail:
+    properties:
+      email:
+        type: string
+    type: object
+  task-manager-backend_internal_app_api.Tokens:
+    properties:
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+      token:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/confirm/{confirm_uid}:
+    get:
+      description: Подтверждает регистрацию пользователя
+      parameters:
+      - description: uid конфирмации
+        in: path
+        name: confirm_uid
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Подтверждение регистрации
+      tags:
+      - auth
+  /auth/new_password:
+    post:
+      consumes:
+      - application/json
+      description: Меняет пароль пользователя на новый
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.ChangePassword'
+      responses:
+        "200":
+          description: OK
+      summary: Восстановление пароля
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Обновляет JWT по refresh токену
+        Для того что бы обновить токен надо быть
+        аунтифицированным
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Refresh'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+      summary: Обновить JWT
+      tags:
+      - auth
+  /auth/restore_password:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет ссылку на страницу с восстановлением пароля
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.RestorePasswordEmail'
+      responses:
+        "200":
+          description: OK
+      summary: Отправка ссылки для восстановления пароля
+      tags:
+      - auth
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Вход в систему по логину и хешу-пароля
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Auth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+      summary: Вход в систему
+      tags:
+      - auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Прямая регистрация нового пользователя в системе
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Auth'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Регистрация
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
