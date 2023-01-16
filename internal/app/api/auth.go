@@ -1,21 +1,27 @@
 package api
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-	"time"
+	"task-manager-backend/internal/app/models/users"
+	"task-manager-backend/internal/app/service/auth"
+)
+
+const (
+	authHeader       = "Authorization"
+	bearerPrefix     = "Bearer"
+	userIDContextKey = "uid"
 )
 
 type Auth struct {
-	Email   string `json:"email"`
-	PwdHash string `json:"pwd_hash"`
+	Email   users.Email `json:"email"`
+	PwdHash string      `json:"pwd_hash"`
 }
 
 type Tokens struct {
-	Token        string    `json:"token"`
-	RefreshToken string    `json:"refresh_token"`
-	ExpiresAt    time.Time `json:"expires_at"`
+	Session users.Session `json:"tokens"`
 }
 
 // SignUp godoc
@@ -35,7 +41,7 @@ func (api *Api) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	err := api.auth.Register(ctx, string(req.PwdHash), string(req.Email))
+	err := api.auth.Register(ctx, string(req.PwdHash), req.Email)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -61,13 +67,13 @@ func (api *Api) SignIn(ctx *gin.Context) {
 		return
 	}
 
-	session, err := api.auth.Auth(ctx, string(req.PwdHash), string(req.Email))
+	session, err := api.auth.Auth(ctx, string(req.PwdHash), req.Email)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, Tokens{Token: session.Token, RefreshToken: session.RefreshToken})
+	ctx.JSON(http.StatusOK, Tokens{Session: session})
 }
 
 type Refresh struct {
@@ -99,7 +105,7 @@ func (api *Api) Refresh(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, Tokens{Token: session.Token, RefreshToken: session.RefreshToken})
+	ctx.JSON(http.StatusOK, Tokens{Session: session})
 }
 
 func (api *Api) AuthMW() gin.HandlerFunc {
@@ -151,10 +157,6 @@ func extractAuthToken(ctx *gin.Context) (string, error) {
 	return parts[1], nil
 }
 
-type Confirmation struct {
-	UID users.ConfirmationUID `uri:"confirm_uid" binding:"required"`
-}
-
 // Confirmation godoc
 // @Summary Подтверждение регистрации
 // @Schemes
@@ -164,23 +166,23 @@ type Confirmation struct {
 // @Param confirm_uid path string true "uid конфирмации"
 // @Router /auth/confirm/{confirm_uid} [get]
 func (api *Api) Confirmation(ctx *gin.Context) {
-	var confirmationUID Confirmation
-	if err := ctx.ShouldBindUri(&confirmationUID); err != nil {
+	var refresh string
+	if err := ctx.ShouldBindUri(&refresh); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	err := api.auth.ConfirmationUser(ctx, confirmationUID.UID)
+	err := api.auth.ConfirmationUser(ctx, refresh)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.Redirect(http.StatusFound, "https://cartips.ru/static/email_ok.html")
+	ctx.AbortWithStatus(http.StatusOK)
 }
 
 type RestorePasswordEmail struct {
-	Email string `json:"email"`
+	Email users.Email `json:"email"`
 }
 
 // RestorePassword godoc

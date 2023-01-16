@@ -8,6 +8,7 @@ import (
 	"github.com/swaggo/swag/example/basic/docs"
 	"go.uber.org/fx"
 	"task-manager-backend/internal/app/config"
+	"task-manager-backend/internal/app/service/auth"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 
 type Api struct {
 	router *gin.Engine
+	auth   *auth.Service
 }
 
 func (api *Api) Run() {
@@ -31,9 +33,11 @@ func (api *Api) Run() {
 
 func NewApi(
 	router *gin.Engine,
+	auth *auth.Service,
 ) *Api {
 	svc := &Api{
 		router: router,
+		auth:   auth,
 	}
 	svc.registerRoutes()
 	return svc

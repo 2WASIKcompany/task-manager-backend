@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/Masterminds/squirrel v1.5.3
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/google/uuid v1.3.0

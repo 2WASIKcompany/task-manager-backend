@@ -237,14 +237,8 @@ const docTemplate = `{
         "internal_app_api.Tokens": {
             "type": "object",
             "properties": {
-                "expires_at": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
+                "tokens": {
+                    "$ref": "#/definitions/users.Session"
                 }
             }
         },
@@ -289,10 +283,15 @@ const docTemplate = `{
         "task-manager-backend_internal_app_api.Tokens": {
             "type": "object",
             "properties": {
-                "expires_at": {
-                    "type": "string"
-                },
-                "refresh_token": {
+                "tokens": {
+                    "$ref": "#/definitions/users.Session"
+                }
+            }
+        },
+        "users.Session": {
+            "type": "object",
+            "properties": {
+                "refresh": {
                     "type": "string"
                 },
                 "token": {

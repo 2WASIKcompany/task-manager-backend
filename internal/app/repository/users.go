@@ -13,6 +13,7 @@ const (
 	Email      = "email"
 	PwdHash    = "pwd_hash"
 	Status     = "status"
+	Confirmed  = "confirmed"
 )
 
 func (p *PostgresRepository) CreateUser(ctx context.Context, user users.User) error {
@@ -36,7 +37,7 @@ func (p *PostgresRepository) CreateUser(ctx context.Context, user users.User) er
 	return err
 }
 
-func (p *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (users.User, error) {
+func (p *PostgresRepository) GetUserByEmail(ctx context.Context, email users.Email) (users.User, error) {
 	var user users.User
 
 	query, args, err := sq.
@@ -58,4 +59,45 @@ func (p *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (
 		err = nil
 	}
 	return user, err
+}
+
+func (p *PostgresRepository) ConfirmUser(ctx context.Context, userID users.ID) error {
+	query, args, err := sq.
+		Update(usersTable).
+		Set(Confirmed, true).
+		Where(
+			sq.Eq{
+				ID: userID,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
+
+}
+
+func (p *PostgresRepository) ChangePasswordByUserID(ctx context.Context, userID users.ID, newPassword string) error {
+	query, args, err := sq.
+		Update(usersTable).
+		Set(PwdHash, newPassword).
+		Where(
+			sq.Eq{
+				ID: userID,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = p.db.ExecContext(ctx, query, args...)
+	return err
 }

@@ -25,12 +25,8 @@ definitions:
     type: object
   internal_app_api.Tokens:
     properties:
-      expires_at:
-        type: string
-      refresh_token:
-        type: string
-      token:
-        type: string
+      tokens:
+        $ref: '#/definitions/users.Session'
     type: object
   task-manager-backend_internal_app_api.Auth:
     properties:
@@ -58,9 +54,12 @@ definitions:
     type: object
   task-manager-backend_internal_app_api.Tokens:
     properties:
-      expires_at:
-        type: string
-      refresh_token:
+      tokens:
+        $ref: '#/definitions/users.Session'
+    type: object
+  users.Session:
+    properties:
+      refresh:
         type: string
       token:
         type: string

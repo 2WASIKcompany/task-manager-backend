@@ -10,6 +10,8 @@ import (
 	"task-manager-backend/internal/app/config"
 	"task-manager-backend/internal/app/repository"
 	"task-manager-backend/internal/app/repository/redis_repository"
+	"task-manager-backend/internal/app/service/auth"
+	"task-manager-backend/internal/app/service/mail"
 )
 
 type combineAuthRepository struct {
@@ -17,13 +19,13 @@ type combineAuthRepository struct {
 	*redis_repository.RedisRepository
 }
 
-func authStorage(storage *repository.PostgresRepository) auth.Storage {
-	rs, err := redis_repository.NewRedisRepo()
+func authStorage(storage *repository.PostgresRepository) auth.Repository {
+	rs, err := redis_repository.NewRedisRepo(config.Load().RedisAddr, config.Load().RedisPasswd, 0)
 	if err != nil {
 		log.Printf("redis connect err: %v", err)
 		os.Exit(1)
 	}
-	return combineAuthStorage{
+	return combineAuthRepository{
 		storage, rs,
 	}
 }
@@ -40,7 +42,10 @@ func main() {
 			api.NewApi,
 			gin.Default,
 			repository.NewPostgresRepository,
+			mail.NewSender,
 			authStorage,
+			auth.NewManger,
+			auth.NewService,
 		),
 		fx.Invoke(api.StartHook),
 	).Run()

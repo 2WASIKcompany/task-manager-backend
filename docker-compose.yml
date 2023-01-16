@@ -1,0 +1,29 @@
+version: '3.7'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "devpass"
+    volumes:
+      - /var/pg_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+  redis:
+    image: redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379"
+  api:
+    image: go-api
+    restart: always
+    volumes:
+      - type: bind
+        source: ./config.yml
+        target: /config.yml
+    ports:
+      - "8080:8080"
