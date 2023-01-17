@@ -60,7 +60,7 @@ type Service struct {
 }
 
 func (s *Service) Register(ctx context.Context, password string, email users.Email) error {
-	if users.ValidateEmail(email) {
+	if !users.ValidateEmail(email) {
 		return InvalidEmail
 	}
 
@@ -175,6 +175,7 @@ func (s *Service) ConfirmationUser(ctx context.Context, refresh string) error {
 	if err != nil {
 		return NotFoundRestoreUIDErr
 	}
+	s.repository.DeleteSession(refresh)
 	userID, _ := strconv.Atoi(strUserID)
 	return s.repository.ConfirmUser(ctx, users.ID(userID))
 }

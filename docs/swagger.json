@@ -44,7 +44,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.ChangePassword"
+                            "$ref": "#/definitions/internal_app_api.ChangePassword"
                         }
                     }
                 ],
@@ -75,7 +75,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Refresh"
+                            "$ref": "#/definitions/internal_app_api.Refresh"
                         }
                     }
                 ],
@@ -83,7 +83,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                            "$ref": "#/definitions/internal_app_api.Tokens"
                         }
                     }
                 }
@@ -106,7 +106,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.RestorePasswordEmail"
+                            "$ref": "#/definitions/internal_app_api.RestorePasswordEmail"
                         }
                     }
                 ],
@@ -137,7 +137,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
+                            "$ref": "#/definitions/internal_app_api.Auth"
                         }
                     }
                 ],
@@ -145,7 +145,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                            "$ref": "#/definitions/internal_app_api.Tokens"
                         }
                     }
                 }
@@ -171,7 +171,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
+                            "$ref": "#/definitions/internal_app_api.Auth"
                         }
                     }
                 ],

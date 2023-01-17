@@ -5,16 +5,16 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/swag/example/basic/docs"
 	"go.uber.org/fx"
+	"task-manager-backend/docs"
 	"task-manager-backend/internal/app/config"
 	"task-manager-backend/internal/app/service/auth"
 )
 
-const (
-	Title    = "Balance handler API"
-	BasePath = "/api/v1/"
-)
+// @BasePath /api/v1/
+const BasePath = "/api/v1/"
+
+const Title = "Task manager API"
 
 type Api struct {
 	router *gin.Engine
@@ -24,6 +24,7 @@ type Api struct {
 func (api *Api) Run() {
 	cfg := config.Load()
 	docs.SwaggerInfo.BasePath = BasePath
+	docs.SwaggerInfo.Title = Title
 
 	api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler, ginSwagger.DefaultModelsExpandDepth(-1)))
 

@@ -56,7 +56,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.ChangePassword"
+                            "$ref": "#/definitions/internal_app_api.ChangePassword"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Refresh"
+                            "$ref": "#/definitions/internal_app_api.Refresh"
                         }
                     }
                 ],
@@ -95,7 +95,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                            "$ref": "#/definitions/internal_app_api.Tokens"
                         }
                     }
                 }
@@ -118,7 +118,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.RestorePasswordEmail"
+                            "$ref": "#/definitions/internal_app_api.RestorePasswordEmail"
                         }
                     }
                 ],
@@ -149,7 +149,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
+                            "$ref": "#/definitions/internal_app_api.Auth"
                         }
                     }
                 ],
@@ -157,7 +157,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                            "$ref": "#/definitions/internal_app_api.Tokens"
                         }
                     }
                 }
@@ -183,7 +183,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
+                            "$ref": "#/definitions/internal_app_api.Auth"
                         }
                     }
                 ],

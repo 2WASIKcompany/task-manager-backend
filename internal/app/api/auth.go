@@ -157,6 +157,10 @@ func extractAuthToken(ctx *gin.Context) (string, error) {
 	return parts[1], nil
 }
 
+type Confirmation struct {
+	UID string `uri:"confirm_uid" binding:"required"`
+}
+
 // Confirmation godoc
 // @Summary Подтверждение регистрации
 // @Schemes
@@ -166,13 +170,13 @@ func extractAuthToken(ctx *gin.Context) (string, error) {
 // @Param confirm_uid path string true "uid конфирмации"
 // @Router /auth/confirm/{confirm_uid} [get]
 func (api *Api) Confirmation(ctx *gin.Context) {
-	var refresh string
+	var refresh Confirmation
 	if err := ctx.ShouldBindUri(&refresh); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
-	err := api.auth.ConfirmationUser(ctx, refresh)
+	err := api.auth.ConfirmationUser(ctx, refresh.UID)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
