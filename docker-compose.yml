@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   postgres:
-    container_name: task-manager-db
+    container_name: app_db
     image: postgres
     restart: always
     environment:
@@ -13,20 +13,22 @@ services:
     ports:
       - "5436:5432"
   redis:
-    container_name: task-manager-redis
+    container_name: app_redis
     image: redis
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     ports:
       - "6386:6379"
-#  api:
-#    container_name: task-manager-api
-#    entrypoint: ["bin/goose","-dir","./migrations","postgres","host=localhost port=5432 user=cartips password=$PG_PASSWORD dbname=cartips sslmode=disable","up"]
-#    image: go-api
-#    restart: always
-#    volumes:
-#      - type: bind
-#        source: ./config.yml
-#        target: /config.yml
-#    ports:
-#      - "8080:8080"
+  api:
+    container_name: task-manager-api
+    image: app_api
+    restart: always
+    volumes:
+      - type: bind
+        source: ./config.yml
+        target: /config.yml
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8080:8080"
