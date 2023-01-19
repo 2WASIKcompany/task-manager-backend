@@ -37,7 +37,7 @@ func (r *RedisRepository) CreateRestoreRefresh(email users.Email, userID users.I
 	return nil
 }
 
-func (r *RedisRepository) GetUserIDByRefresh(refresh string) (users.ID, error) {
+func (r *RedisRepository) GetUserIDByRestoreRefresh(refresh string) (users.ID, error) {
 	request, err := r.db.Get(restoreRefresh + refresh).Result()
 	if err != nil {
 		return 0, errors.New("GetUserIDByRestoreUID err: restore_uid not found")

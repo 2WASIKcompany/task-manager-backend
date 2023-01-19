@@ -19,14 +19,14 @@ type combineAuthRepository struct {
 	*redis_repository.RedisRepository
 }
 
-func authStorage(storage *repository.PostgresRepository) auth.Repository {
+func authStorage(repository *repository.PostgresRepository) auth.Repository {
 	rs, err := redis_repository.NewRedisRepo(config.Load().RedisAddr, config.Load().RedisPasswd, 0)
 	if err != nil {
 		log.Printf("redis connect err: %v", err)
 		os.Exit(1)
 	}
 	return combineAuthRepository{
-		storage, rs,
+		repository, rs,
 	}
 }
 
