@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -28,7 +29,7 @@ func (api *Api) Run() {
 
 	api.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler, ginSwagger.DefaultModelsExpandDepth(-1)))
 
-	api.router.Use(CORSMiddleware())
+	api.router.Use(cors.Default())
 	api.router.Run(cfg.Api.GetAddr())
 }
 
