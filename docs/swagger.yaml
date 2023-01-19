@@ -13,6 +13,10 @@ definitions:
       restore_uid:
         type: string
     type: object
+  internal_app_api.Error:
+    properties:
+      err: {}
+    type: object
   internal_app_api.Refresh:
     properties:
       refresh_token:
@@ -42,6 +46,10 @@ definitions:
       restore_uid:
         type: string
     type: object
+  task-manager-backend_internal_app_api.Error:
+    properties:
+      err: {}
+    type: object
   task-manager-backend_internal_app_api.Refresh:
     properties:
       refresh_token:
@@ -67,19 +75,47 @@ definitions:
 info:
   contact: {}
 paths:
-  /auth/confirm/{confirm_uid}:
+  /auth/confirm/{confirm_token}:
     get:
       description: Подтверждает регистрацию пользователя
       parameters:
       - description: uid конфирмации
         in: path
-        name: confirm_uid
+        name: confirm_token
         required: true
         type: string
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
       summary: Подтверждение регистрации
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Инвалидирует сессию для устройства, с которого выполняется выход
+      parameters:
+      - description: Входные параметры
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Refresh'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Выход с аккаунта
       tags:
       - auth
   /auth/new_password:
@@ -93,10 +129,22 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_app_api.ChangePassword'
+          $ref: '#/definitions/task-manager-backend_internal_app_api.ChangePassword'
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "500":
+          description: Internal Server Error
       summary: Восстановление пароля
       tags:
       - auth
@@ -114,14 +162,18 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_app_api.Refresh'
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Refresh'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_app_api.Tokens'
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
       summary: Обновить JWT
       tags:
       - auth
@@ -136,10 +188,20 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_app_api.RestorePasswordEmail'
+          $ref: '#/definitions/task-manager-backend_internal_app_api.RestorePasswordEmail'
       responses:
         "200":
           description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "500":
+          description: Internal Server Error
       summary: Отправка ссылки для восстановления пароля
       tags:
       - auth
@@ -154,14 +216,24 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_app_api.Auth'
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Auth'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_app_api.Tokens'
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Tokens'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "500":
+          description: Internal Server Error
       summary: Вход в систему
       tags:
       - auth
@@ -176,12 +248,22 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_app_api.Auth'
+          $ref: '#/definitions/task-manager-backend_internal_app_api.Auth'
       produces:
       - application/json
       responses:
         "200":
           description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/task-manager-backend_internal_app_api.Error'
+        "500":
+          description: Internal Server Error
       summary: Регистрация
       tags:
       - auth

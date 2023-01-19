@@ -9,10 +9,10 @@ import (
 
 const (
 	restoreEmailRate = "restore_rate:"
-	restoreUID       = "restore_uid:"
+	restoreRefresh   = "restore_refresh:"
 )
 
-func (r *RedisRepository) CreateRestoreUID(email users.Email, userID users.ID, uid string) error {
+func (r *RedisRepository) CreateRestoreRefresh(email users.Email, userID users.ID, refresh string) error {
 	key := restoreEmailRate + string(email)
 	result, err := r.db.Exists(key).Result()
 	if err != nil {
@@ -30,15 +30,15 @@ func (r *RedisRepository) CreateRestoreUID(email users.Email, userID users.ID, u
 		return errors.New("CreateRestoreUID err:request limit exceeded")
 	}
 
-	if r.db.Set(restoreUID+uid, int64(userID), 10800*time.Second).Err() != nil {
+	if r.db.Set(restoreRefresh+refresh, int64(userID), 10800*time.Second).Err() != nil {
 		return errors.New("CreateRestoreUID err: create restore uid err")
 	}
 
 	return nil
 }
 
-func (r *RedisRepository) GetUserIDByRestoreUID(uid string) (users.ID, error) {
-	request, err := r.db.Get(restoreUID + uid).Result()
+func (r *RedisRepository) GetUserIDByRefresh(refresh string) (users.ID, error) {
+	request, err := r.db.Get(restoreRefresh + refresh).Result()
 	if err != nil {
 		return 0, errors.New("GetUserIDByRestoreUID err: restore_uid not found")
 	}
@@ -48,7 +48,7 @@ func (r *RedisRepository) GetUserIDByRestoreUID(uid string) (users.ID, error) {
 		return 0, errors.New("GetUserIDByRestoreUID err: bad user_id")
 	}
 
-	r.db.Del(restoreUID + uid)
+	r.db.Del(restoreRefresh + refresh)
 
 	return users.ID(userID), nil
 }

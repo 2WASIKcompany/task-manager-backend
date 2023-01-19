@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"regexp"
 	"strconv"
 	"task-manager-backend/internal/app/models/users"
 	"task-manager-backend/internal/app/service/mail"
@@ -19,12 +19,11 @@ const (
 )
 
 var (
-	InvalidEmail          = errors.New("invalid email")
-	UserAlreadyExist      = errors.New("user already exist")
-	IncorrectCreds        = errors.New("incorrect creds")
-	NotFoundEmail         = errors.New("not found email")
-	NotFoundRestoreUIDErr = errors.New("not found confirm uid")
-	NotFoundEmailErr      = errors.New("email not found")
+	InvalidData      = errors.New("Invalid data")
+	UserAlreadyExist = errors.New("This email was registered before")
+	IncorrectCreds   = errors.New("Incorrect login or password")
+	NotFoundEmail    = errors.New("This email is not registered")
+	InvalidRefresh   = errors.New("Invalid token")
 )
 
 type AuthData struct {
@@ -41,8 +40,8 @@ type Repository interface {
 	CashRefreshToken(users.ID, string, time.Duration) error
 	GetUserIDByRefreshToken(string) (string, error)
 	DeleteSession(string) error
-	CreateRestoreUID(users.Email, users.ID, string) error
-	GetUserIDByRestoreUID(string) (users.ID, error)
+	CreateRestoreRefresh(users.Email, users.ID, string) error
+	GetUserIDByRestoreRefresh(string) (users.ID, error)
 }
 
 func NewService(repository Repository, jwt *Manager, sender *mail.Sender) *Service {
@@ -60,8 +59,8 @@ type Service struct {
 }
 
 func (s *Service) Register(ctx context.Context, password string, email users.Email) error {
-	if !users.ValidateEmail(email) {
-		return InvalidEmail
+	if !users.ValidateEmail(email) || !validatePass(password) {
+		return InvalidData
 	}
 
 	if _, err := s.repository.GetUserByEmail(ctx, email); err != nil {
@@ -95,11 +94,19 @@ func salt(pass string) (string, error) {
 	return string(saltPass), err
 }
 
+func (s *Service) Logout(ctx context.Context, refresh string) error {
+	return s.repository.DeleteSession(refresh)
+}
+
 func (s *Service) Auth(ctx context.Context, password string, email users.Email) (users.Session, error) {
+	if !users.ValidateEmail(email) || !validatePass(password) {
+		return users.Session{}, InvalidData
+	}
+
 	user, err := s.repository.GetUserByEmail(ctx, email)
 	if err != nil {
 		log.Printf("Auth: Cant get user: %v", err)
-		return users.Session{}, err
+		return users.Session{}, IncorrectCreds
 	}
 
 	credsCorrect := user.CheckCerds(users.Email(email), password)
@@ -124,18 +131,41 @@ func (s *Service) Auth(ctx context.Context, password string, email users.Email) 
 	return session, err
 }
 
-func (s *Service) ChangePassword(ctx context.Context, restoreUID, newPassword string) error {
-	userID, err := s.repository.GetUserIDByRestoreUID(restoreUID)
+func (s *Service) ChangePassword(ctx context.Context, restoreRefresh, newPassword string) (users.Session, error) {
+	if !validatePass(newPassword) {
+		return users.Session{}, InvalidData
+	}
+
+	userID, err := s.repository.GetUserIDByRestoreRefresh(restoreRefresh)
 	if err != nil {
-		return NotFoundRestoreUIDErr
+		return users.Session{}, InvalidRefresh
 	}
 
 	saltPass, err := salt(newPassword)
 	if err != nil {
-		return err
+		return users.Session{}, err
 	}
 
-	return s.repository.ChangePasswordByUserID(ctx, userID, saltPass)
+	token, _ := s.jwt.CreateToken(userID)
+	refresh := s.jwt.CreateRefreshToken()
+
+	return users.Session{Token: token, Refresh: refresh}, s.repository.ChangePasswordByUserID(ctx, userID, saltPass)
+}
+
+func validatePass(pass string) bool {
+	if lenPass := len(pass); lenPass < 6 || lenPass > 20 {
+		return false
+	}
+	if check, _ := regexp.MatchString("^[\\x20-\\x7E]+$", pass); !check {
+		return false
+	}
+	if check, _ := regexp.MatchString("[0-9]", pass); !check {
+		return false
+	}
+	if check, _ := regexp.MatchString("[A-Za-z]", pass); !check {
+		return false
+	}
+	return true
 }
 
 func (s *Service) UnmarshalToken(token string) (users.ID, error) {
@@ -170,29 +200,36 @@ func (s *Service) RefreshToken(ctx context.Context, refreshToken string) (users.
 	return users.Session{Token: token, Refresh: newRefreshToken}, nil
 }
 
-func (s *Service) ConfirmationUser(ctx context.Context, refresh string) error {
-	strUserID, err := s.repository.GetUserIDByRefreshToken(refresh)
+func (s *Service) ConfirmationUser(ctx context.Context, restoreRefresh string) (users.Session, error) {
+	strUserID, err := s.repository.GetUserIDByRefreshToken(restoreRefresh)
 	if err != nil {
-		return NotFoundRestoreUIDErr
+		return users.Session{}, InvalidRefresh
 	}
-	s.repository.DeleteSession(refresh)
+	s.repository.DeleteSession(restoreRefresh)
 	userID, _ := strconv.Atoi(strUserID)
-	return s.repository.ConfirmUser(ctx, users.ID(userID))
+
+	token, _ := s.jwt.CreateToken(users.ID(userID))
+	refresh := s.jwt.CreateRefreshToken()
+
+	return users.Session{Token: token, Refresh: refresh}, s.repository.ConfirmUser(ctx, users.ID(userID))
 }
 
 func (s *Service) SendRestorePasswordMail(ctx context.Context, email users.Email) error {
+	if !users.ValidateEmail(email) {
+		return InvalidData
+	}
 	user, err := s.repository.GetUserByEmail(ctx, email)
 	if err != nil {
 		return NotFoundEmail
 	}
 
-	uid := strconv.Itoa(int(uuid.New().ID()))
-	err = s.repository.CreateRestoreUID(email, user.ID, uid)
+	refresh := s.jwt.CreateRefreshToken()
+	err = s.repository.CreateRestoreRefresh(email, user.ID, refresh)
 	if err != nil {
 		return err
 	}
 
-	s.sender.SendMail(string(email), fmt.Sprintf(changePassMsg, string(email), uid))
+	s.sender.SendMail(string(email), fmt.Sprintf(changePassMsg, string(email), refresh))
 
 	return nil
 }

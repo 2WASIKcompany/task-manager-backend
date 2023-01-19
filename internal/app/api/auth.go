@@ -15,6 +15,10 @@ const (
 	userIDContextKey = "uid"
 )
 
+type Error struct {
+	Err error `json:"err"`
+}
+
 type Auth struct {
 	Email   users.Email `json:"email"`
 	PwdHash string      `json:"pwd_hash"`
@@ -33,16 +37,53 @@ type Tokens struct {
 // @Produce json
 // @Param data body Auth true "Входные параметры"
 // @Success 200
+// @Failure 400 {object} Error
+// @Failure 403 {object} Error
+// @Failure 500
 // @Router /auth/signup [post]
 func (api *Api) SignUp(ctx *gin.Context) {
 	var req Auth
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
 		return
 	}
 
 	err := api.auth.Register(ctx, string(req.PwdHash), req.Email)
+	if err == auth.InvalidData {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		return
+	}
+	if err == auth.UserAlreadyExist {
+		ctx.JSON(http.StatusForbidden, Error{Err: auth.UserAlreadyExist})
+		return
+	}
 	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.AbortWithStatus(http.StatusOK)
+}
+
+// Logout godoc
+// @Summary Выход с аккаунта
+// @Schemes
+// @Description Инвалидирует сессию для устройства, с которого выполняется выход
+// @Tags auth
+// @Accept json
+// @Param data body Refresh true "Входные параметры"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /auth/logout [post]
+func (api *Api) Logout(ctx *gin.Context) {
+	var refresh Refresh
+	if err := ctx.BindJSON(&refresh); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if err := api.auth.Logout(ctx, refresh.RefreshToken); err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -59,15 +100,26 @@ func (api *Api) SignUp(ctx *gin.Context) {
 // @Produce json
 // @Param data body Auth true "Входные параметры"
 // @Success 200 {object} Tokens
+// @Failure 400 {object} Error
+// @Failure 403 {object} Error
+// @Failure 500
 // @Router /auth/signin [post]
 func (api *Api) SignIn(ctx *gin.Context) {
 	var req Auth
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
 		return
 	}
 
 	session, err := api.auth.Auth(ctx, string(req.PwdHash), req.Email)
+	if err == auth.InvalidData {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		return
+	}
+	if err == auth.IncorrectCreds {
+		ctx.JSON(http.StatusForbidden, Error{Err: auth.IncorrectCreds})
+		return
+	}
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -91,6 +143,8 @@ type Refresh struct {
 // @Produce json
 // @Param data body Refresh true "Входные параметры"
 // @Success 200 {object} Tokens
+// @Failure 400
+// @Failure 500
 // @Router /auth/refresh [post]
 func (api *Api) Refresh(ctx *gin.Context) {
 	var token Refresh
@@ -158,7 +212,7 @@ func extractAuthToken(ctx *gin.Context) (string, error) {
 }
 
 type Confirmation struct {
-	UID string `uri:"confirm_uid" binding:"required"`
+	Token string `uri:"confirm_token" binding:"required"`
 }
 
 // Confirmation godoc
@@ -166,9 +220,11 @@ type Confirmation struct {
 // @Schemes
 // @Description Подтверждает регистрацию пользователя
 // @Tags auth
-// @Success 200
-// @Param confirm_uid path string true "uid конфирмации"
-// @Router /auth/confirm/{confirm_uid} [get]
+// @Success 200 {object} Tokens
+// @Failure 400
+// @Failure 500
+// @Param confirm_token path string true "uid конфирмации"
+// @Router /auth/confirm/{confirm_token} [get]
 func (api *Api) Confirmation(ctx *gin.Context) {
 	var refresh Confirmation
 	if err := ctx.ShouldBindUri(&refresh); err != nil {
@@ -176,13 +232,17 @@ func (api *Api) Confirmation(ctx *gin.Context) {
 		return
 	}
 
-	err := api.auth.ConfirmationUser(ctx, refresh.UID)
+	session, err := api.auth.ConfirmationUser(ctx, refresh.Token)
+	if err == auth.InvalidRefresh {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.AbortWithStatus(http.StatusOK)
+	ctx.JSON(http.StatusOK, Tokens{Session: session})
 }
 
 type RestorePasswordEmail struct {
@@ -197,17 +257,24 @@ type RestorePasswordEmail struct {
 // @Accept json
 // @Param data body RestorePasswordEmail true "Входные параметры"
 // @Success 200
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Failure 500
 // @Router /auth/restore_password [post]
 func (api *Api) RestorePassword(ctx *gin.Context) {
 	var restoreEmail RestorePasswordEmail
 	if err := ctx.BindJSON(&restoreEmail); err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
 		return
 	}
 
 	err := api.auth.SendRestorePasswordMail(ctx, restoreEmail.Email)
-	if err == auth.NotFoundEmailErr {
-		ctx.AbortWithStatus(http.StatusNotFound)
+	if err == auth.InvalidData {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		return
+	}
+	if err == auth.NotFoundEmail {
+		ctx.JSON(http.StatusNotFound, Error{Err: auth.NotFoundEmail})
 		return
 	} else if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -229,23 +296,31 @@ type ChangePassword struct {
 // @Tags auth
 // @Accept json
 // @Param data body ChangePassword true "Входные параметры"
-// @Success 200
+// @Success 200 {object} Tokens
+// @Failure 400 {object} Error
+// @Failure 404 {object} Error
+// @Failure 500
 // @Router /auth/new_password [post]
 func (api *Api) NewPassword(ctx *gin.Context) {
 	var changePassword ChangePassword
 	if err := ctx.BindJSON(&changePassword); err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
 		return
 	}
 
-	err := api.auth.ChangePassword(ctx, changePassword.RestoreUID, changePassword.NewPassword)
-	if err == auth.NotFoundRestoreUIDErr {
-		ctx.AbortWithStatus(http.StatusNotFound)
+	session, err := api.auth.ChangePassword(ctx, changePassword.RestoreUID, changePassword.NewPassword)
+	if err == auth.InvalidData {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
 		return
-	} else if err != nil {
+	}
+	if err == auth.InvalidRefresh {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidRefresh})
+		return
+	}
+	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.AbortWithStatus(http.StatusOK)
+	ctx.JSON(http.StatusOK, Tokens{Session: session})
 }

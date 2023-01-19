@@ -77,9 +77,10 @@ func (api *Api) registerRoutes() {
 
 	auth := base.Group("/auth")
 	auth.POST("/signup", api.SignUp)
+	auth.POST("/logout", api.Logout)
 	auth.POST("/signin", api.SignIn)
 	auth.POST("/refresh", api.Refresh)
-	auth.GET("/confirm/:confirm_uid", api.Confirmation)
+	auth.GET("/confirm/:confirm_token", api.Confirmation)
 	auth.POST("/restore_password", api.RestorePassword)
 	auth.POST("/new_password", api.NewPassword)
 }

@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/confirm/{confirm_uid}": {
+        "/auth/confirm/{confirm_token}": {
             "get": {
                 "description": "Подтверждает регистрацию пользователя",
                 "tags": [
@@ -27,14 +27,57 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "uid конфирмации",
-                        "name": "confirm_uid",
+                        "name": "confirm_token",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "Инвалидирует сессию для устройства, с которого выполняется выход",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Выход с аккаунта",
+                "parameters": [
+                    {
+                        "description": "Входные параметры",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Refresh"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -56,13 +99,31 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.ChangePassword"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.ChangePassword"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -87,7 +148,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.Refresh"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Refresh"
                         }
                     }
                 ],
@@ -95,8 +156,14 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.Tokens"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -118,13 +185,28 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.RestorePasswordEmail"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.RestorePasswordEmail"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -149,7 +231,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.Auth"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
                         }
                     }
                 ],
@@ -157,8 +239,23 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.Tokens"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Tokens"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -183,13 +280,28 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_app_api.Auth"
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Auth"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/task-manager-backend_internal_app_api.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -216,6 +328,12 @@ const docTemplate = `{
                 "restore_uid": {
                     "type": "string"
                 }
+            }
+        },
+        "internal_app_api.Error": {
+            "type": "object",
+            "properties": {
+                "err": {}
             }
         },
         "internal_app_api.Refresh": {
@@ -262,6 +380,12 @@ const docTemplate = `{
                 "restore_uid": {
                     "type": "string"
                 }
+            }
+        },
+        "task-manager-backend_internal_app_api.Error": {
+            "type": "object",
+            "properties": {
+                "err": {}
             }
         },
         "task-manager-backend_internal_app_api.Refresh": {
