@@ -1,0 +1,6 @@
+name: Task-manager-backend-ci
+
+on:
+  push:
+    branches:
+      - master
