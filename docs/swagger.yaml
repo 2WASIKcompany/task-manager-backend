@@ -10,7 +10,7 @@ definitions:
     properties:
       new_password:
         type: string
-      restore_uid:
+      restore_refresh:
         type: string
     type: object
   internal_app_api.Error:
@@ -44,7 +44,7 @@ definitions:
     properties:
       new_password:
         type: string
-      restore_uid:
+      restore_refresh:
         type: string
     type: object
   task-manager-backend_internal_app_api.Error:
@@ -81,7 +81,7 @@ paths:
     get:
       description: Подтверждает регистрацию пользователя
       parameters:
-      - description: uid конфирмации
+      - description: token конфирмации
         in: path
         name: confirm_token
         required: true

@@ -223,7 +223,7 @@ type Confirmation struct {
 // @Success 200 {object} Tokens
 // @Failure 400
 // @Failure 500
-// @Param confirm_token path string true "uid конфирмации"
+// @Param confirm_token path string true "token конфирмации"
 // @Router /auth/confirm/{confirm_token} [get]
 func (api *Api) Confirmation(ctx *gin.Context) {
 	var refresh Confirmation
@@ -285,8 +285,8 @@ func (api *Api) RestorePassword(ctx *gin.Context) {
 }
 
 type ChangePassword struct {
-	RestoreUID  string `json:"restore_uid"`
-	NewPassword string `json:"new_password"`
+	RestoreRefresh string `json:"restore_refresh"`
+	NewPassword    string `json:"new_password"`
 }
 
 // NewPassword godoc
@@ -308,7 +308,7 @@ func (api *Api) NewPassword(ctx *gin.Context) {
 		return
 	}
 
-	session, err := api.auth.ChangePassword(ctx, changePassword.RestoreUID, changePassword.NewPassword)
+	session, err := api.auth.ChangePassword(ctx, changePassword.RestoreRefresh, changePassword.NewPassword)
 	if err == auth.InvalidData {
 		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return

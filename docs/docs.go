@@ -26,7 +26,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid конфирмации",
+                        "description": "token конфирмации",
                         "name": "confirm_token",
                         "in": "path",
                         "required": true
@@ -325,7 +325,7 @@ const docTemplate = `{
                 "new_password": {
                     "type": "string"
                 },
-                "restore_uid": {
+                "restore_refresh": {
                     "type": "string"
                 }
             }
@@ -379,7 +379,7 @@ const docTemplate = `{
                 "new_password": {
                     "type": "string"
                 },
-                "restore_uid": {
+                "restore_refresh": {
                     "type": "string"
                 }
             }

@@ -14,7 +14,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "uid конфирмации",
+                        "description": "token конфирмации",
                         "name": "confirm_token",
                         "in": "path",
                         "required": true
@@ -313,7 +313,7 @@
                 "new_password": {
                     "type": "string"
                 },
-                "restore_uid": {
+                "restore_refresh": {
                     "type": "string"
                 }
             }
@@ -367,7 +367,7 @@
                 "new_password": {
                     "type": "string"
                 },
-                "restore_uid": {
+                "restore_refresh": {
                     "type": "string"
                 }
             }
