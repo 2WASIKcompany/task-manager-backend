@@ -15,7 +15,8 @@ definitions:
     type: object
   internal_app_api.Error:
     properties:
-      err: {}
+      err:
+        type: string
     type: object
   internal_app_api.Refresh:
     properties:
@@ -48,7 +49,8 @@ definitions:
     type: object
   task-manager-backend_internal_app_api.Error:
     properties:
-      err: {}
+      err:
+        type: string
     type: object
   task-manager-backend_internal_app_api.Refresh:
     properties:

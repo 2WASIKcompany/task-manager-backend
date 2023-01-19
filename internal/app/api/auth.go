@@ -16,7 +16,7 @@ const (
 )
 
 type Error struct {
-	Err error `json:"err"`
+	Err string `json:"err"`
 }
 
 type Auth struct {
@@ -44,17 +44,17 @@ type Tokens struct {
 func (api *Api) SignUp(ctx *gin.Context) {
 	var req Auth
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 
 	err := api.auth.Register(ctx, string(req.PwdHash), req.Email)
 	if err == auth.InvalidData {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 	if err == auth.UserAlreadyExist {
-		ctx.JSON(http.StatusForbidden, Error{Err: auth.UserAlreadyExist})
+		ctx.JSON(http.StatusForbidden, Error{Err: auth.UserAlreadyExist.Error()})
 		return
 	}
 	if err != nil {
@@ -107,17 +107,17 @@ func (api *Api) Logout(ctx *gin.Context) {
 func (api *Api) SignIn(ctx *gin.Context) {
 	var req Auth
 	if err := ctx.BindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 
 	session, err := api.auth.Auth(ctx, string(req.PwdHash), req.Email)
 	if err == auth.InvalidData {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 	if err == auth.IncorrectCreds {
-		ctx.JSON(http.StatusForbidden, Error{Err: auth.IncorrectCreds})
+		ctx.JSON(http.StatusForbidden, Error{Err: auth.IncorrectCreds.Error()})
 		return
 	}
 	if err != nil {
@@ -264,17 +264,17 @@ type RestorePasswordEmail struct {
 func (api *Api) RestorePassword(ctx *gin.Context) {
 	var restoreEmail RestorePasswordEmail
 	if err := ctx.BindJSON(&restoreEmail); err != nil {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 
 	err := api.auth.SendRestorePasswordMail(ctx, restoreEmail.Email)
 	if err == auth.InvalidData {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 	if err == auth.NotFoundEmail {
-		ctx.JSON(http.StatusNotFound, Error{Err: auth.NotFoundEmail})
+		ctx.JSON(http.StatusNotFound, Error{Err: auth.NotFoundEmail.Error()})
 		return
 	} else if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -304,17 +304,17 @@ type ChangePassword struct {
 func (api *Api) NewPassword(ctx *gin.Context) {
 	var changePassword ChangePassword
 	if err := ctx.BindJSON(&changePassword); err != nil {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 
 	session, err := api.auth.ChangePassword(ctx, changePassword.RestoreUID, changePassword.NewPassword)
 	if err == auth.InvalidData {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
 	if err == auth.InvalidRefresh {
-		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidRefresh})
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidRefresh.Error()})
 		return
 	}
 	if err != nil {

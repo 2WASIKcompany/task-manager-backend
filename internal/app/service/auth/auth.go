@@ -63,7 +63,7 @@ func (s *Service) Register(ctx context.Context, password string, email users.Ema
 		return InvalidData
 	}
 
-	if _, err := s.repository.GetUserByEmail(ctx, email); err != nil {
+	if user, _ := s.repository.GetUserByEmail(ctx, email); user.Email == email {
 		return UserAlreadyExist
 	}
 
@@ -109,7 +109,7 @@ func (s *Service) Auth(ctx context.Context, password string, email users.Email) 
 		return users.Session{}, IncorrectCreds
 	}
 
-	credsCorrect := user.CheckCerds(users.Email(email), password)
+	credsCorrect := user.CheckCerds(email, password)
 
 	if !credsCorrect {
 		return users.Session{}, IncorrectCreds

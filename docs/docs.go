@@ -333,7 +333,9 @@ const docTemplate = `{
         "internal_app_api.Error": {
             "type": "object",
             "properties": {
-                "err": {}
+                "err": {
+                    "type": "string"
+                }
             }
         },
         "internal_app_api.Refresh": {
@@ -385,7 +387,9 @@ const docTemplate = `{
         "task-manager-backend_internal_app_api.Error": {
             "type": "object",
             "properties": {
-                "err": {}
+                "err": {
+                    "type": "string"
+                }
             }
         },
         "task-manager-backend_internal_app_api.Refresh": {
