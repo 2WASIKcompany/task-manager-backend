@@ -49,11 +49,10 @@ func (usr *User) CheckCerds(email Email, pwdhash string) bool {
 		return false
 	}
 
-	return doPasswordsMatch(string(usr.PwdHash), string(pwdhash))
+	return DoPasswordsMatch(string(usr.PwdHash), string(pwdhash))
 }
 
-// TODO: перенести в auth сервис
-func doPasswordsMatch(hashedPassword, currPassword string) bool {
+func DoPasswordsMatch(hashedPassword, currPassword string) bool {
 	err := bcrypt.CompareHashAndPassword(
 		[]byte(hashedPassword), []byte(currPassword))
 	return err == nil

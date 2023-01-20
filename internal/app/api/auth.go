@@ -116,6 +116,10 @@ func (api *Api) SignIn(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidData.Error()})
 		return
 	}
+	if err == auth.NonConfirmed {
+		ctx.JSON(http.StatusForbidden, Error{Err: auth.NonConfirmed.Error()})
+		return
+	}
 	if err == auth.IncorrectCreds {
 		ctx.JSON(http.StatusForbidden, Error{Err: auth.IncorrectCreds.Error()})
 		return
@@ -315,6 +319,10 @@ func (api *Api) NewPassword(ctx *gin.Context) {
 	}
 	if err == auth.InvalidRefresh {
 		ctx.JSON(http.StatusBadRequest, Error{Err: auth.InvalidRefresh.Error()})
+		return
+	}
+	if err == auth.SamePassword {
+		ctx.JSON(http.StatusBadRequest, Error{Err: auth.SamePassword.Error()})
 		return
 	}
 	if err != nil {

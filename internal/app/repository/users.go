@@ -14,6 +14,7 @@ const (
 	PwdHash    = "pwd_hash"
 	Status     = "status"
 	Confirmed  = "confirmed"
+	RegData    = "reg_date"
 )
 
 func (p *PostgresRepository) CreateUser(ctx context.Context, user users.User) error {
@@ -41,11 +42,35 @@ func (p *PostgresRepository) GetUserByEmail(ctx context.Context, email users.Ema
 	var user users.User
 
 	query, args, err := sq.
-		Select(ID, Email, PwdHash, Status).
+		Select(ID, Email, PwdHash, Status, Confirmed).
 		From(usersTable).
 		Where(
 			sq.Eq{
 				Email: email,
+			},
+		).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return user, err
+	}
+
+	err = p.db.GetContext(ctx, &user, query, args...)
+	if err == sql.ErrNoRows {
+		err = nil
+	}
+	return user, err
+}
+
+func (p *PostgresRepository) GetUserByUserID(ctx context.Context, userID users.ID) (users.User, error) {
+	var user users.User
+
+	query, args, err := sq.
+		Select(ID, Email, PwdHash, Status, Confirmed).
+		From(usersTable).
+		Where(
+			sq.Eq{
+				ID: userID,
 			},
 		).
 		PlaceholderFormat(sq.Dollar).

@@ -24,6 +24,8 @@ var (
 	IncorrectCreds   = errors.New("Incorrect login or password")
 	NotFoundEmail    = errors.New("This email is not registered")
 	InvalidRefresh   = errors.New("Invalid token")
+	NonConfirmed     = errors.New("Registration has not been confirmed")
+	SamePassword     = errors.New("Same password")
 )
 
 type AuthData struct {
@@ -36,6 +38,7 @@ type Repository interface {
 	GetUserByEmail(context.Context, users.Email) (users.User, error)
 	ConfirmUser(context.Context, users.ID) error
 	ChangePasswordByUserID(context.Context, users.ID, string) error
+	GetUserByUserID(context.Context, users.ID) (users.User, error)
 
 	CashRefreshToken(users.ID, string, time.Duration) error
 	GetUserIDByRefreshToken(string) (string, error)
@@ -104,9 +107,13 @@ func (s *Service) Auth(ctx context.Context, password string, email users.Email) 
 	}
 
 	user, err := s.repository.GetUserByEmail(ctx, email)
-	if err != nil {
+	if user.Email == "" || err != nil {
 		log.Printf("Auth: Cant get user: %v", err)
 		return users.Session{}, IncorrectCreds
+	}
+
+	if !user.Confirmed {
+		return users.Session{}, NonConfirmed
 	}
 
 	credsCorrect := user.CheckCerds(email, password)
@@ -139,6 +146,11 @@ func (s *Service) ChangePassword(ctx context.Context, restoreRefresh, newPasswor
 	userID, err := s.repository.GetUserIDByRestoreRefresh(restoreRefresh)
 	if err != nil {
 		return users.Session{}, InvalidRefresh
+	}
+
+	user, err := s.repository.GetUserByUserID(ctx, userID)
+	if users.DoPasswordsMatch(user.PwdHash, newPassword) {
+		return users.Session{}, SamePassword
 	}
 
 	saltPass, err := salt(newPassword)
