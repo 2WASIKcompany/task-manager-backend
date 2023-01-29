@@ -13,7 +13,6 @@ jobs:
     - uses: actions/checkout@v2
     - run: |
         pwd
-        git pull
         docker build . -t app_api
         
   migrations:
@@ -28,6 +27,7 @@ jobs:
   run:
     runs-on: self-hosted
     steps:
+    - uses: actions/checkout@v2
     - run: |
         echo ${{secrets.CONFIG}} | base64 -d > config.yml
         docker-compose create
@@ -38,6 +38,7 @@ jobs:
   clear:
     runs-on: self-hosted
     steps:
+    - uses: actions/checkout@v2
     - run: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
     needs: 
     - run
