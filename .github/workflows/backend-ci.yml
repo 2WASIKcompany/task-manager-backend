@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: |
-        git pull https://{{secrets.TOKEN}}@github.com/2WASIKcompany/task-manager-backend
+        git pull https://${{secrets.TOKEN}}@github.com/2WASIKcompany/task-manager-backend
         docker build . -t app_api
         
   migrations:
