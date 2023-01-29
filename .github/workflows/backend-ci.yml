@@ -35,4 +35,4 @@ jobs:
     steps:
     - run: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
     needs: 
-    - build
+    - run
