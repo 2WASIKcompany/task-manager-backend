@@ -9,11 +9,11 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@master
-    - run: |
-        git pull
-        echo "make git pull"
-        docker build . -t app_api
+    - uses: actions/checkout@v2
+    - uses: appleboy/ssh-action@master
+      with:
+        key: ${{secrets.SSH_PRIVATE_KEY}}
+        
   migrations:
     runs-on: self-hosted
     steps:
@@ -22,6 +22,7 @@ jobs:
         bin/goose -dir ./migrations postgres "host=${{secrets.PG_HOST}} port=5432 user=postgres password=${{secrets.PG_PASSWORD}} dbname=postgres sslmode=disable" up
     needs: 
     - build
+    
   run:
     runs-on: self-hosted
     steps:
@@ -31,6 +32,7 @@ jobs:
         docker-compose start
     needs: 
     - build
+    
   clear:
     runs-on: self-hosted
     steps:
