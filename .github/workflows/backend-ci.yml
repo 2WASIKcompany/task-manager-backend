@@ -10,4 +10,29 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@master
-    - run: ls
+    - run: |
+        git pull
+        docker build . -t app_api
+  migrations:
+    runs-on: self-hosted
+    steps:
+    - run: |
+        chmod +x bin/goose
+        bin/goose -dir ./migrations postgres "host=${{secrets.PG_HOST}} port=5432 user=postgres password=${{secrets.PG_PASSWORD}} dbname=postgres sslmode=disable" up
+    needs: 
+    - build
+  run:
+    runs-on: self-hosted
+    steps:
+    - run: |
+        echo ${{secrets.CONFIG}} | base64 -d > config.yml
+        docker-compose create
+        docker-compose start
+    needs: 
+    - build
+  clear:
+    runs-on: self-hosted
+    steps:
+    - run: docker rmi $(docker images --filter "dangling=true" -q --no-trunc)
+    needs: 
+    - build
