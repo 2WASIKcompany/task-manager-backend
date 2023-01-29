@@ -17,4 +17,5 @@ services:
       - "8080:8080"
 networks:
   task-manager:
-    external: true
+    driver: overlay
+    attachable: tru
