@@ -10,6 +10,9 @@ services:
         target: /config.yml
     networks:
       - task-manager
+    depends_on:
+      - postgres
+      - redis
     ports:
       - "8080:8080"
 networks:
