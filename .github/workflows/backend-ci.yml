@@ -4,3 +4,9 @@ on:
   push:
     branches:
       - master
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@master
