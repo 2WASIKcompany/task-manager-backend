@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: appleyboy/ssh-action@v0.1.7
+    - uses: appleboy/ssh-action@v0.1.2
       with:
         host: 65.108.16.15
         username: lexar
