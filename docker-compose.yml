@@ -18,4 +18,4 @@ services:
 networks:
   task-manager:
     driver: overlay
-    attachable: tru
+    attachable: true
