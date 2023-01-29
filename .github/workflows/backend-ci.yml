@@ -10,11 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: aapleyboy/ssh-action@master
-      with:
-        key: ${{ secrets.OMG_SECRET }}
-        script: |
-          ls
+    - uses: actions/checkout@v3
+    - run: ls
         
 #   migrations:
 #     runs-on: self-hosted
