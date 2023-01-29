@@ -11,12 +11,9 @@ jobs:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
-    - uses: appleboy/ssh-action@master
-      with:
-        key: ${{secrets.SSH_PRIVATE_KEY}}
-        script: |
-          git pull
-          docker build . -t tracker
+    - run: |
+        git pull
+        docker build . -t tracker
         
   migrations:
     runs-on: self-hosted
