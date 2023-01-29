@@ -12,6 +12,7 @@ jobs:
     - uses: actions/checkout@master
     - run: |
         git pull
+        echo "make git pull"
         docker build . -t app_api
   migrations:
     runs-on: self-hosted
