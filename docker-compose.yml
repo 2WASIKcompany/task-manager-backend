@@ -11,8 +11,8 @@ services:
     networks:
       - task-manager
     depends_on:
-      - postgres
-      - redis
+      - app_redis
+      - app_db
     ports:
       - "8080:8080"
 networks:
