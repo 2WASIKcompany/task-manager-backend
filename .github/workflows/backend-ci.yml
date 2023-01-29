@@ -10,7 +10,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: appleyboy/ssh-action@master
+      with:
+        host: 65.108.16.15
+        username: lexar
+        key: ${{ secrets.OMG_SECRET }}
+        port: 22
+        script: |
+          ls
     - run: pwd
         
 #   migrations:
