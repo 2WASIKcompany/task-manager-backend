@@ -16,10 +16,8 @@ jobs:
         host: 65.108.16.15
         username: lexar
         key: ${{ secrets.OMG_SECRET }}
-        port: 22
         script: |
           ls
-    - run: pwd
         
 #   migrations:
 #     runs-on: self-hosted
