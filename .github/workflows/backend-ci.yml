@@ -12,15 +12,6 @@ jobs:
     - uses: actions/checkout@v2
     - run: |
         docker build . -t app_api
-        
-  migrations:
-    runs-on: self-hosted
-    steps:
-    - run: |
-        chmod +x bin/goose
-        bin/goose -dir ./migrations postgres "host=${{secrets.PG_HOST}} port=5432 user=postgres password=${{secrets.PG_PASSWORD}} dbname=postgres sslmode=disable" up
-    needs: 
-    - build
     
   run:
     runs-on: self-hosted
@@ -32,6 +23,15 @@ jobs:
         docker-compose start
     needs: 
     - build
+  
+  migrations:
+    runs-on: self-hosted
+    steps:
+    - run: |
+        chmod +x bin/goose
+        bin/goose -dir ./migrations postgres "host=${{secrets.PG_HOST}} port=5432 user=postgres password=${{secrets.PG_PASSWORD}} dbname=postgres sslmode=disable" up
+    needs: 
+    - run
     
   clear:
     runs-on: self-hosted
