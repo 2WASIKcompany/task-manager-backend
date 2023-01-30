@@ -17,8 +17,6 @@ services:
       POSTGRES_PASSWORD: "devpass"
     volumes:
       - /var/pg_data:/var/lib/postgresql/data
-    networks:
-      - task-manager
     ports:
       - "5432:5432"
   api:
