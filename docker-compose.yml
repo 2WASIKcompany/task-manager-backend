@@ -1,5 +1,26 @@
 version: '3.7'
 services:
+  redis:
+    container_name: app_redis
+    image: redis
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+  postgres:
+    container_name: app_db
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "devpass"
+    volumes:
+      - /var/pg_data:/var/lib/postgresql/data
+    networks:
+      - task-manager
+    ports:
+      - "5432:5432"
   api:
     container_name: task-manager-api
     image: app_api
@@ -8,11 +29,8 @@ services:
       - type: bind
         source: ./config.yml
         target: /config.yml
-    networks:
-      - task-manager
+    depends_on:
+      - postgres
+      - redis
     ports:
       - "8080:8080"
-networks:
-  task-manager:
-    driver: overlay
-    attachable: true
